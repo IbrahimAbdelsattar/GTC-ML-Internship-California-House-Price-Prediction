@@ -3,14 +3,12 @@ import pandas as pd
 import joblib
 
 # Load trained model
-model = joblib.load("house_price_model.pkl")
+model = joblib.load("house_price_model_lgm.pkl")
 
 # List of model features (must match training exactly)
 model_features = [
     'longitude', 'latitude', 'housing_median_age', 'total_rooms',
-    'total_bedrooms', 'population', 'households', 'median_income',
-    'ocean_proximity_INLAND', 'ocean_proximity_ISLAND',
-    'ocean_proximity_NEAR BAY', 'ocean_proximity_NEAR OCEAN'
+    'total_bedrooms', 'population', 'households', 'median_income', 'ocean_proximity'
 ]
 
 # App Title
@@ -37,7 +35,12 @@ def user_input_features():
         ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
     )
 
-    # Create base dataframe
+    # Encode ocean_proximity using LabelEncoder mapping
+    # Ensure this matches what you used during training
+    ocean_dict = {"<1H OCEAN": 0, "INLAND": 1, "ISLAND": 2, "NEAR BAY": 3, "NEAR OCEAN": 4}
+    ocean_encoded = ocean_dict[ocean_input]
+
+    # Create dataframe
     data = {
         'longitude': longitude,
         'latitude': latitude,
@@ -46,17 +49,13 @@ def user_input_features():
         'total_bedrooms': total_bedrooms,
         'population': population,
         'households': households,
-        'median_income': median_income
+        'median_income': median_income,
+        'ocean_proximity': ocean_encoded
     }
 
     df = pd.DataFrame(data, index=[0])
 
-    # One-hot encode ocean_proximity (drop <1H OCEAN as reference)
-    ocean_categories = ["INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
-    for ocean in ocean_categories:
-        df[f'ocean_proximity_{ocean}'] = 1 if ocean_input == ocean else 0
-
-    # Reorder columns to match model features
+    # Reorder columns to match model
     df = df[model_features]
 
     return df
