@@ -6,7 +6,7 @@ import os
 # -------------------------------
 # 1️⃣ Check if required files exist
 # -------------------------------
-required_files = ["house_price_model_lgm.pkl", "X_scaler.pkl", "y_scaler.pkl", "ocean_le.pkl"]
+required_files = ["house_price_model_lgm.pkl", "X_scaler.pkl", "y_scaler.pkl", "ocean_la.pkl"]
 
 for f in required_files:
     if not os.path.exists(f):
@@ -19,7 +19,7 @@ for f in required_files:
 model = joblib.load("house_price_model_lgm.pkl")
 X_scaler = joblib.load("X_scaler.pkl")
 y_scaler = joblib.load("y_scaler.pkl")
-le = joblib.load("ocean_le.pkl")
+le = joblib.load("ocean_la.pkl")
 
 # -------------------------------
 # 3️⃣ Model features (must match training)
@@ -105,4 +105,5 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${y_pred[0,0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
+
 
