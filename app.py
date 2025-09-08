@@ -1,12 +1,11 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
-# Load trained model
-model = joblib.load("house_price_model.pkl")
+# Load trained model (trained on only 9 features)
+model = joblib.load("house_price_model_9_features.pkl")
 
-# List of model features (must match training exactly)
+# List of model features
 model_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
                   'total_bedrooms', 'population', 'households', 'median_income', 'ocean_proximity']
 
@@ -29,7 +28,7 @@ def user_input_features():
     ocean_proximity = st.sidebar.selectbox("Ocean Proximity", 
                                            ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"])
     
-    # Encode ocean_proximity
+    # Encode ocean_proximity (must match training preprocessing)
     ocean_dict = {"<1H OCEAN":0, "INLAND":1, "ISLAND":2, "NEAR BAY":3, "NEAR OCEAN":4}
     ocean_encoded = ocean_dict[ocean_proximity]
 
@@ -44,11 +43,12 @@ def user_input_features():
         'median_income': median_income,
         'ocean_proximity': ocean_encoded
     }
+
     df = pd.DataFrame(data, index=[0])
-    
-    # Reorder columns to match model
+
+    # Ensure column order matches the model
     df = df[model_features]
-    
+
     return df
 
 input_df = user_input_features()
