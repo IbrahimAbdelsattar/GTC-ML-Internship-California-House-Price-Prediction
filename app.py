@@ -1,17 +1,28 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
 # -------------------------------
-# 1️⃣ Load trained model and scalers
+# 1️⃣ Check if required files exist
 # -------------------------------
-model = joblib.load("house_price_model_lgm.pkl")
-X_scaler = joblib.load("X_scaler.pkl")      # numeric feature scaler
-y_scaler = joblib.load("y_scaler.pkl")      # target scaler
-le = joblib.load("ocean_le.pkl")            # label encoder for ocean_proximity
+required_files = ["house_price_model_lgm.pkl", "X_scaler.pkl", "y_scaler.pkl", "ocean_le.pkl"]
+
+for f in required_files:
+    if not os.path.exists(f):
+        st.error(f"❌ Required file not found: {f}. Make sure it is in the app folder.")
+        st.stop()  # stop execution if any file is missing
 
 # -------------------------------
-# 2️⃣ Model features (must match training)
+# 2️⃣ Load model, scalers, and LabelEncoder
+# -------------------------------
+model = joblib.load("house_price_model.pkl")
+X_scaler = joblib.load("X_scaler.pkl")
+y_scaler = joblib.load("y_scaler.pkl")
+le = joblib.load("ocean_le.pkl")
+
+# -------------------------------
+# 3️⃣ Model features (must match training)
 # -------------------------------
 model_features = [
     'longitude', 'latitude', 'housing_median_age', 'total_rooms',
@@ -19,13 +30,13 @@ model_features = [
 ]
 
 # -------------------------------
-# 3️⃣ App title and description
+# 4️⃣ App title and description
 # -------------------------------
 st.title("🏠 California House Price Prediction")
 st.write("This app predicts the **median house value** based on housing features.")
 
 # -------------------------------
-# 4️⃣ Sidebar inputs
+# 5️⃣ Sidebar for user input
 # -------------------------------
 st.sidebar.header("Input Features")
 
@@ -43,7 +54,7 @@ def user_input_features():
     # Categorical input
     ocean_input = st.sidebar.selectbox(
         "Ocean Proximity",
-        le.classes_  # use the classes from LabelEncoder to match training
+        le.classes_  # get categories from fitted LabelEncoder
     )
 
     # Encode ocean_proximity
@@ -81,7 +92,7 @@ st.subheader("User Input Features")
 st.write(input_df)
 
 # -------------------------------
-# 5️⃣ Prediction
+# 6️⃣ Prediction
 # -------------------------------
 if st.button("Predict House Price"):
     try:
@@ -94,4 +105,3 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${y_pred[0,0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
-
