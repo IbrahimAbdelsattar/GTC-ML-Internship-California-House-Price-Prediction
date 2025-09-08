@@ -6,6 +6,10 @@ import joblib
 # Load trained model
 model = joblib.load("house_price_model.pkl")
 
+# List of model features (must match training exactly)
+model_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
+                  'total_bedrooms', 'population', 'households', 'median_income', 'ocean_proximity']
+
 # App Title
 st.title("🏠 House Price Prediction App")
 st.write("This app predicts the **median house value** based on housing features.")
@@ -25,7 +29,7 @@ def user_input_features():
     ocean_proximity = st.sidebar.selectbox("Ocean Proximity", 
                                            ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"])
     
-    # Encode ocean_proximity (must match training preprocessing!)
+    # Encode ocean_proximity
     ocean_dict = {"<1H OCEAN":0, "INLAND":1, "ISLAND":2, "NEAR BAY":3, "NEAR OCEAN":4}
     ocean_encoded = ocean_dict[ocean_proximity]
 
@@ -40,11 +44,19 @@ def user_input_features():
         'median_income': median_income,
         'ocean_proximity': ocean_encoded
     }
-    return pd.DataFrame(data, index=[0])
+    df = pd.DataFrame(data, index=[0])
+    
+    # Reorder columns to match model
+    df = df[model_features]
+    
+    return df
 
 input_df = user_input_features()
 
 # Prediction
 if st.button("Predict House Price"):
-    prediction = model.predict(input_df)
-    st.success(f"🏡 Predicted Median House Value: ${prediction[0]:,.2f}")
+    try:
+        prediction = model.predict(input_df)
+        st.success(f"🏡 Predicted Median House Value: ${prediction[0]:,.2f}")
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
