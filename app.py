@@ -16,7 +16,7 @@ for f in required_files:
 # -------------------------------
 # 2️⃣ Load model, scalers, and LabelEncoder
 # -------------------------------
-model = joblib.load("house_price_model.pkl")
+model = joblib.load("house_price_model_lgm.pkl")
 X_scaler = joblib.load("X_scaler.pkl")
 y_scaler = joblib.load("y_scaler.pkl")
 le = joblib.load("ocean_le.pkl")
@@ -105,3 +105,4 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${y_pred[0,0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
+
