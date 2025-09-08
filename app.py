@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load trained model (trained on only 9 features)
-model = joblib.load("house_price_model_9_features.pkl")
+model = joblib.load("house_price_model.pkl")
 
 # List of model features
 model_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
@@ -60,3 +60,4 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${prediction[0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
+
