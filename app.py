@@ -45,10 +45,9 @@ def user_input_features():
     df = pd.DataFrame(data, index=[0])
 
     # One-hot encode ocean_proximity
-    ocean_categories = ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
-    for ocean in ocean_categories:
-        df[f'ocean_proximity_{ocean}'] = 1 if ocean_input == ocean else 0
-
+    ocean_columns = ["INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
+    for ocean in ocean_columns:
+      df[f'ocean_proximity_{ocean}'] = 1 if ocean_input == ocean else 0
     # Ensure columns are in the same order as model_features
     df = df[model_features]
 
@@ -63,3 +62,4 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${prediction[0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
+
