@@ -5,7 +5,7 @@ import joblib
 # -------------------------------
 # 1️⃣ Load trained model and scalers
 # -------------------------------
-model = joblib.load("house_price_model.pkl")
+model = joblib.load("house_price_model_lgm.pkl")
 X_scaler = joblib.load("X_scaler.pkl")      # numeric feature scaler
 y_scaler = joblib.load("y_scaler.pkl")      # target scaler
 le = joblib.load("ocean_le.pkl")            # label encoder for ocean_proximity
@@ -94,3 +94,4 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${y_pred[0,0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
+
