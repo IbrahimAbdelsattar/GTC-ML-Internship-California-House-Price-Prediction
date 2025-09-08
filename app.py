@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load trained model (trained on only 9 features)
+# Load trained model
 model = joblib.load("house_price_model.pkl")
 
-# List of model features
+# List of model features (must match training exactly)
 model_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
-                  'total_bedrooms', 'population', 'households', 'median_income', 'ocean_proximity']
+                  'total_bedrooms', 'population', 'households', 'median_income',
+                  'ocean_proximity_<1H OCEAN', 'ocean_proximity_INLAND',
+                  'ocean_proximity_ISLAND', 'ocean_proximity_NEAR BAY', 'ocean_proximity_NEAR OCEAN']
 
 # App Title
 st.title("🏠 House Price Prediction App")
@@ -25,13 +27,10 @@ def user_input_features():
     population = st.sidebar.number_input("Population", 1, 20000, 800)
     households = st.sidebar.number_input("Households", 1, 5000, 400)
     median_income = st.sidebar.slider("Median Income (10,000s)", 0.0, 15.0, 3.0)
-    ocean_proximity = st.sidebar.selectbox("Ocean Proximity", 
-                                           ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"])
+    ocean_input = st.sidebar.selectbox("Ocean Proximity", 
+                                       ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"])
     
-    # Encode ocean_proximity (must match training preprocessing)
-    ocean_dict = {"<1H OCEAN":0, "INLAND":1, "ISLAND":2, "NEAR BAY":3, "NEAR OCEAN":4}
-    ocean_encoded = ocean_dict[ocean_proximity]
-
+    # Base numeric features
     data = {
         'longitude': longitude,
         'latitude': latitude,
@@ -40,13 +39,17 @@ def user_input_features():
         'total_bedrooms': total_bedrooms,
         'population': population,
         'households': households,
-        'median_income': median_income,
-        'ocean_proximity': ocean_encoded
+        'median_income': median_income
     }
 
     df = pd.DataFrame(data, index=[0])
 
-    # Ensure column order matches the model
+    # One-hot encode ocean_proximity
+    ocean_categories = ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
+    for ocean in ocean_categories:
+        df[f'ocean_proximity_{ocean}'] = 1 if ocean_input == ocean else 0
+
+    # Ensure columns are in the same order as model_features
     df = df[model_features]
 
     return df
@@ -60,4 +63,3 @@ if st.button("Predict House Price"):
         st.success(f"🏡 Predicted Median House Value: ${prediction[0]:,.2f}")
     except Exception as e:
         st.error(f"Error during prediction: {e}")
-
