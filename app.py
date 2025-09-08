@@ -2,29 +2,31 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load trained model
-model = joblib.load("house_price_model_lgm.pkl")
+# -------------------------------
+# 1️⃣ Load trained model and scalers
+# -------------------------------
+model = joblib.load("house_price_model.pkl")
+X_scaler = joblib.load("X_scaler.pkl")      # numeric feature scaler
+y_scaler = joblib.load("y_scaler.pkl")      # target scaler
+le = joblib.load("ocean_le.pkl")            # label encoder for ocean_proximity
 
-# Load scalers used during training
-# y_scaler scales the target (median_house_value)
-# X_scaler scales numeric features if used
-y_scaler = joblib.load("y_scaler.pkl")
-try:
-    X_scaler = joblib.load("X_scaler.pkl")  # optional
-except:
-    X_scaler = None
-
-# List of model features (must match training exactly)
+# -------------------------------
+# 2️⃣ Model features (must match training)
+# -------------------------------
 model_features = [
     'longitude', 'latitude', 'housing_median_age', 'total_rooms',
     'total_bedrooms', 'population', 'households', 'median_income', 'ocean_proximity'
 ]
 
-# App Title
-st.title("🏠 House Price Prediction App")
+# -------------------------------
+# 3️⃣ App title and description
+# -------------------------------
+st.title("🏠 California House Price Prediction")
 st.write("This app predicts the **median house value** based on housing features.")
 
-# Sidebar for input
+# -------------------------------
+# 4️⃣ Sidebar inputs
+# -------------------------------
 st.sidebar.header("Input Features")
 
 def user_input_features():
@@ -41,12 +43,11 @@ def user_input_features():
     # Categorical input
     ocean_input = st.sidebar.selectbox(
         "Ocean Proximity",
-        ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
+        le.classes_  # use the classes from LabelEncoder to match training
     )
 
-    # Encode ocean_proximity using LabelEncoder mapping (must match training)
-    ocean_dict = {"<1H OCEAN":0, "INLAND":1, "ISLAND":2, "NEAR BAY":3, "NEAR OCEAN":4}
-    ocean_encoded = ocean_dict[ocean_input]
+    # Encode ocean_proximity
+    ocean_encoded = le.transform([ocean_input])[0]
 
     # Create dataframe
     data = {
@@ -63,11 +64,10 @@ def user_input_features():
 
     df = pd.DataFrame(data, index=[0])
 
-    # Scale numeric features if scaler exists
-    if X_scaler is not None:
-        numeric_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
-                            'total_bedrooms', 'population', 'households', 'median_income']
-        df[numeric_features] = X_scaler.transform(df[numeric_features])
+    # Scale numeric features
+    numeric_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms',
+                        'total_bedrooms', 'population', 'households', 'median_income']
+    df[numeric_features] = X_scaler.transform(df[numeric_features])
 
     # Reorder columns to match model
     df = df[model_features]
@@ -76,13 +76,19 @@ def user_input_features():
 
 input_df = user_input_features()
 
-# Prediction
+# Display user input
+st.subheader("User Input Features")
+st.write(input_df)
+
+# -------------------------------
+# 5️⃣ Prediction
+# -------------------------------
 if st.button("Predict House Price"):
     try:
         # Predict scaled target
         y_pred_scaled = model.predict(input_df)
 
-        # Inverse transform to original scale
+        # Inverse transform to original house price
         y_pred = y_scaler.inverse_transform(y_pred_scaled.reshape(-1,1))
 
         st.success(f"🏡 Predicted Median House Value: ${y_pred[0,0]:,.2f}")
