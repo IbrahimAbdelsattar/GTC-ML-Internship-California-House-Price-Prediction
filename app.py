@@ -50,4 +50,9 @@ input_df = user_input_features()
 # Prediction button
 if st.button("Predict House Price"):
     prediction = model.predict(input_df)
-    st.success(f"🏡 Predicted Median House Value: ${prediction[0]}")
+    
+    # Convert back to actual USD (since dataset target is in 100,000s)
+    price_usd = prediction[0] * 100000  
+    
+    st.success(f"🏡 Predicted Median House Value: ${price_usd:,.0f}")
+
