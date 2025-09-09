@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load trained model
-model = joblib.load("house_price_model.pkl")
+model = joblib.load("house_price_model_lgm.pkl")
 
 # App Title
 st.title("🏠 California Housing Price Prediction")
@@ -54,3 +54,4 @@ if submit_button:
     prediction = model.predict(input_df)
     price_usd = prediction[0] * 100000  # Convert back to USD
     st.success(f"🏡 Predicted Median House Value: ${price_usd:,.0f}")
+
