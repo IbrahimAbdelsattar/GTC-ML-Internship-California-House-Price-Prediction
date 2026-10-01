@@ -26,6 +26,27 @@ The app multiplies the model output by `100000` when displaying USD. Verify this
 
 The notebook uses a Kaggle path; change it to the included housing CSV for local execution. Its training dependencies include packages beyond the inference requirements. Estimates reflect the dataset and model, not current property valuations.
 
+## UML diagrams
+
+### Main workflow
+
+The interface creates the model feature row, applies its ocean-proximity encoding, and converts the prediction to the displayed dollar scale.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Streamlit app.py
+    participant Features as Form feature preparation
+    participant Model as LightGBM pickle
+    User->>App: Enter housing attributes
+    App->>Features: Encode ocean proximity and build row
+    Features-->>App: Ordered housing features
+    App->>Model: predict
+    Model-->>App: Model-scale price
+    App->>App: Multiply prediction by 100000
+    App-->>User: Display estimated USD value
+```
+
 ## Getting started
 
 ```bash
